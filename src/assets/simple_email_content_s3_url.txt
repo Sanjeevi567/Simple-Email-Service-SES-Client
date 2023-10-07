@@ -1,0 +1,1 @@
+https://demo567.s3.ap-south-1.amazonaws.com/email_contents/simple_email_content.html

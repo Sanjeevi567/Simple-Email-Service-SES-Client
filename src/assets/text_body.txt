@@ -1,0 +1,8 @@
+Hello,
+
+I hope this message finds you well. I wanted to share some exciting updates with you. We've been diving deep into Rust programming, harnessing its power for AWS SDKs, and exploring the magic of WebAssembly. 
+
+Stay tuned for more insights and innovations in these areas.
+
+Best regards,
+Sanjeevi

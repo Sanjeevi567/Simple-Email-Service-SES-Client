@@ -5,6 +5,6 @@
     
   
     "Lang" : "Rust",
-    "Authors_Name" : "Sanjeevi",
+    "Author_Name" : "Sanjeevi",
     "Api": "AWS Simple Email Service(SES)"
 }

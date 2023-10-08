@@ -480,7 +480,7 @@ async fn main() {
             .unwrap();
                             match lst_name.is_empty() {
                                 false => {
-                                    ses_ops.delete_contact_list_name(&contact_list_name).await;
+                                    ses_ops.delete_contact_list_name(&lst_name).await;
                                 }
                                 true => println!(
                                     "{}\n",

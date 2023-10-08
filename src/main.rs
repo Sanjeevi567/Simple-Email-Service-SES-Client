@@ -138,89 +138,112 @@ async fn main() {
                             .prompt_skippable()
                             .unwrap()
                             .unwrap();
-                            let subject_path =Text::new("Please provide the path to the subject data in HTML format to create Subject for Email Template\n")
-                        .with_placeholder("The subject can contain template variables to personalize the email template's subject line\nDo not use apostrophes, spaces, or commas around template variables\n")
-                        .with_help_message("An example subject template is available here https://tinyurl.com/4etkub75 ")
-                        .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
-                        .prompt()
-                        .unwrap();
+                            match template_name.is_empty() {
+                                false => {
+                                    let is_template_already_exist =
+                                        ses_ops.is_email_template_exist(&template_name).await;
+                                    if !is_template_already_exist {
+                                        let subject_path =Text::new("Please provide the path to the subject data in HTML format to create Subject for Email Template\n")
+                                    .with_placeholder("The subject can contain template variables to personalize the email template's subject line\nDo not use apostrophes, spaces, or commas around template variables\n")
+                                    .with_help_message("An example subject template is available here https://tinyurl.com/4etkub75 ")
+                                    .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
+                                    .prompt()
+                                    .unwrap();
 
-                            let template_path = Text::new("Please provide the path for the template in HTML format to Create a HTML body for the Email Template\n")
-                              .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
-                              .with_placeholder("The HTML body can contain both template variables and HTML content\n")
-                              .with_help_message("Example template is available at this location: https://tinyurl.com/rmxwfc5v")
-                              .prompt()
-                              .unwrap();
-
-                            let text_path =Text::new("Please provide the path to the text body for the email template\n")
-                        .with_placeholder("This section is optional, but it's essential to include for recipients who do not support HTML\n")
-                        .with_formatter(&|input| format!("Received Text Body Is: {input}\n"))
-                        .with_help_message("Example text body data is available here https://tinyurl.com/ycy4sbmn")
-                        .prompt_skippable()
-                        .unwrap()
-                        .unwrap();
-                            match (
-                                template_name.is_empty(),
-                                subject_path.is_empty(),
-                                template_path.is_empty(),
-                            ) {
-                                (false, false, false) => {
-                                    let mut reading_template_data = OpenOptions::new()
+                                        let template_path = Text::new("Please provide the path for the template in HTML format to Create a HTML body for the Email Template\n")
+                                          .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
+                                          .with_placeholder("The HTML body can contain both template variables and HTML content\n")
+                                          .with_help_message("Example template is available at this location: https://tinyurl.com/rmxwfc5v")
+                                          .prompt()
+                                          .unwrap();
+                                match (subject_path.is_empty(),template_path.is_empty()){
+                                    (false,false) => {
+                                        let mut reading_template_data = OpenOptions::new()
                                         .read(true)
                                         .write(true)
                                         .open(&template_path)
                                         .expect(
                                             "Error opening the Template file path you specified\n",
                                         );
-                                    let mut template_data = String::new();
-                                    reading_template_data
-                                        .read_to_string(&mut template_data)
-                                        .expect("Error while reading data\n");
-                                    let mut reading_subject_data = OpenOptions::new()
+                                        let mut template_data = String::new();
+                                        reading_template_data
+                                            .read_to_string(&mut template_data)
+                                            .expect("Error while reading data\n");
+                                        let mut reading_subject_data = OpenOptions::new()
                                         .read(true)
                                         .write(true)
                                         .open(&subject_path)
                                         .expect(
                                             "Error opening the Subject file path you specified\n",
                                         );
-                                    let mut subject_data = String::new();
-                                    reading_subject_data
-                                        .read_to_string(&mut subject_data)
-                                        .expect("Error while reading data\n");
-
-                                    match text_path.is_empty() {
-                                        false => {
-                                            let mut reading_text_data = OpenOptions::new()
+                                        let mut subject_data = String::new();
+                                        reading_subject_data
+                                            .read_to_string(&mut subject_data)
+                                            .expect("Error while reading data\n");
+                                        let text_path =Text::new("Please provide the path to the text body for the email template\n")
+                                        .with_placeholder("This section is optional, but it's essential to include for recipients who do not support HTML\n")
+                                        .with_formatter(&|input| format!("Received Text Body Is: {input}\n"))
+                                        .with_help_message("Example text body data is available here https://tinyurl.com/ycy4sbmn")
+                                        .prompt_skippable()
+                                        .unwrap()
+                                        .unwrap();
+                                        match text_path.is_empty() {
+                                            false => {
+                                                let mut reading_text_data = OpenOptions::new()
                                                          .read(true)
                                                          .write(true)
                                                          .open(&text_path)
                                                          .expect("Error opening the Text Body file path you specified\n");
-                                            let mut text_data = String::new();
-                                            reading_text_data
-                                                .read_to_string(&mut text_data)
-                                                .expect(
+                                                let mut text_data = String::new();
+                                                reading_text_data
+                                                    .read_to_string(&mut text_data)
+                                                    .expect(
                                                     "Error opening the file path you specified\n",
                                                 );
 
-                                            ses_ops
-                                                .create_email_template(
-                                                    &template_name,
-                                                    &subject_data,
-                                                    &template_data,
-                                                    Some(text_data),
-                                                )
-                                                .await;
+                                                ses_ops
+                                                    .create_email_template(
+                                                        &template_name,
+                                                        &subject_data,
+                                                        &template_data,
+                                                        Some(text_data),
+                                                    )
+                                                    .await;
+                                            }
+                                            true => {
+                                                ses_ops
+                                                    .create_email_template(
+                                                        &template_name,
+                                                        &subject_data,
+                                                        &template_data,
+                                                        None,
+                                                    )
+                                                    .await;
+                                            }
                                         }
-                                        true => {
-                                            ses_ops
-                                                .create_email_template(
-                                                    &template_name,
-                                                    &subject_data,
-                                                    &template_data,
-                                                    None,
-                                                )
-                                                .await;
+                                    }
+                                    _ => println!("{}\n","Subject or Template path can't be empty".red().bold())
+                                }
+                                    } else {
+                                        println!(
+                                            "Template '{}' already exists",
+                                            template_name.red().bold()
+                                        );
+                                        println!(
+                                            "{}",
+                                            "Try using different template name".yellow().bold()
+                                        );
+                                        println!(
+                "{}\n",
+                "Below are the available template names in your credentials and region"
+                    .yellow()
+                    .bold()
+            );
+                                        let templates = ses_ops.list_email_templates().await;
+                                        for template_name in templates {
+                                            println!("    {}", template_name.green().bold());
                                         }
+                                        println!("");
                                     }
                                 }
                                 _ => {
@@ -242,7 +265,9 @@ async fn main() {
                     .unwrap();
                             match template_name.is_empty() {
                                 false => {
-                                    let is_template_exist = ses_ops
+                                    let is_template_exist = ses_ops.is_email_template_exist(&template_name).await;
+                                    if is_template_exist {
+                                        let is_template_exist = ses_ops
                                         .get_template_subject_html_and_text(&template_name, false);
                                     match is_template_exist.await {
                                         Some((
@@ -339,6 +364,25 @@ async fn main() {
                                         }
                                         None => {}
                                     }
+                                    }
+                                    else {
+                                        println!(
+                                            "The template named '{}' doesn't exist",
+                                            template_name.red().bold()
+                                        );
+                                        println!(
+                                            "{}\n",
+                                            "Here are the available template names in your credentials and region"
+                                                .yellow()
+                                                .bold()
+                                        );
+                                        let templates = ses_ops.list_email_templates().await;
+                                        for template_name in templates {
+                                            println!("    {}", template_name.green().bold());
+                                        }
+                                        println!("");
+                                    } 
+                                    
                                 }
                                 true => {
                                     println!("{}\n", "Template Name can't be empty".red().bold())
@@ -413,7 +457,23 @@ async fn main() {
                                             });
                                             println!("");
                                         }
-                                        None => {}
+                                        None => {
+                                            println!(
+                                                "The template named '{}' doesn't exist",
+                                                template_name.red().bold()
+                                            );
+                                            println!(
+                                                "{}\n",
+                                                "Here are the available template names in your credentials or region"
+                                                    .yellow()
+                                                    .bold()
+                                            );
+                                            let templates = ses_ops.list_email_templates().await;
+                                            for template_name in templates {
+                                                println!("    {}", template_name.green().bold());
+                                            }
+                                            println!("");
+                                        }
                                     }
                                 }
                                 true => {
@@ -600,7 +660,7 @@ async fn main() {
                                     } else {
                                         println!(
                                             "No identity was found for the email '{}'",
-                                            email_to_verify
+                                            email_to_verify.red().bold()
                                         );
                                         println!("{}\n","Please execute the 'create email identity' option before verifying this email".yellow().bold());
                                     }

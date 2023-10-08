@@ -1,3 +1,11 @@
 TEMPLATE_NAME=your_default_template_name
 LIST_NAME=your_default_contact_lists_name
 FROM_ADDRESS=your_default_from_address
+
+If you are in Ubuntu based systems:
+
+nano ~/.bashrc
+
+export TEMPLATE_NAME=your_default_template_name
+export LIST_NAME=your_default_contact_lists_name
+export FROM_ADDRESS=your_default_from_address

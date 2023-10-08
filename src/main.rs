@@ -242,98 +242,102 @@ async fn main() {
                     .unwrap();
                             match template_name.is_empty() {
                                 false => {
-                                    let (current_subject, current_template_html, current_text) =
-                                        ses_ops
-                                            .get_template_subject_html_and_text(
-                                                &template_name,
-                                                false,
-                                            )
-                                            .await;
-                                    let current_subject = format!(
-                                        "Your current email template subject is:\n {}",
-                                        current_subject
-                                    );
-                                    let subject_path =Text::new("Please provide the path to the subject data in JSON format to update\n")
-                        .with_placeholder(&current_subject)
-                        .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
-                        .prompt()
-                        .unwrap();
-                                    let current_template_variables = ses_ops
-                                        .get_template_variables_of_subject_and_html_body(
-                                            &current_subject,
-                                            &current_template_html,
-                                        );
-                                    let current_template_variables = format!("These are the current template variables in the template named '{}'\n{}",template_name,current_template_variables.1.join("\n"));
-                                    let template_path = Text::new("Please provide the path for the template in JSON format to update it with the old one\n")
-                              .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
-                              .with_placeholder(&current_template_variables)
-                              .with_help_message("Example template is available at this location: https://tinyurl.com/4na92rph")
-                              .prompt()
-                              .unwrap();
-                                    let current_text = format!(
-                                        "Your current email template text is:\n{}\n",
-                                        current_text
-                                    );
-                                    let text_path =Text::new("Please provide the path to the text body for the email template\n")
-                        .with_placeholder(&current_text)
-                        .with_help_message("This section is optional, but it's essential to include for recipients who do not support HTML")
-                        .with_formatter(&|input| format!("Received Text Body Is: {input}\n"))
-                        .prompt_skippable()
-                        .unwrap()
-                        .unwrap();
-                                    let mut reading_template_data = OpenOptions::new()
-                                        .read(true)
-                                        .write(true)
-                                        .open(&template_path)
-                                        .expect(
-                                            "Error opening the Template file path you specified\n",
-                                        );
-                                    let mut template_data = String::new();
-                                    reading_template_data
-                                        .read_to_string(&mut template_data)
-                                        .expect("Error while reading template data\n");
-                                    let mut reading_subject_data = OpenOptions::new()
-                                        .read(true)
-                                        .write(true)
-                                        .open(&subject_path)
-                                        .expect(
-                                            "Error opening the Subject file path you specified",
-                                        );
-                                    let mut subject_data = String::new();
-                                    reading_subject_data
-                                        .read_to_string(&mut subject_data)
-                                        .expect("Error while reading subject data\n");
+                                    let is_template_exist = ses_ops
+                                        .get_template_subject_html_and_text(&template_name, false);
+                                    match is_template_exist.await {
+                                        Some((
+                                            current_subject,
+                                            current_template_html,
+                                            current_text,
+                                        )) => {
+                                            let current_subject = format!(
+                                                "Your current email template subject is:\n {}",
+                                                current_subject
+                                            );
+                                            let subject_path =Text::new("Please provide the path to the subject data in JSON format to update\n")
+                                    .with_placeholder(&current_subject)
+                                    .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
+                                    .prompt()
+                                    .unwrap();
+                                            let current_template_variables = ses_ops
+                                                .get_template_variables_of_subject_and_html_body(
+                                                    &current_subject,
+                                                    &current_template_html,
+                                                );
+                                            let current_template_variables = format!("These are the current template variables in the template named '{}'\n{}",template_name,current_template_variables.1.join("\n"));
+                                            let template_path = Text::new("Please provide the path for the template in JSON format to update it with the old one\n")
+                                          .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
+                                          .with_placeholder(&current_template_variables)
+                                          .with_help_message("Example template is available at this location: https://tinyurl.com/4na92rph")
+                                          .prompt()
+                                          .unwrap();
+                                            let current_text = format!(
+                                                "Your current email template text is:\n{}\n",
+                                                current_text
+                                            );
+                                            let text_path =Text::new("Please provide the path to the text body for the email template\n")
+                                    .with_placeholder(&current_text)
+                                    .with_help_message("This section is optional, but it's essential to include for recipients who do not support HTML")
+                                    .with_formatter(&|input| format!("Received Text Body Is: {input}\n"))
+                                    .prompt_skippable()
+                                    .unwrap()
+                                    .unwrap();
+                                            let mut reading_template_data = OpenOptions::new()
+                                                    .read(true)
+                                                    .write(true)
+                                                    .open(&template_path)
+                                                    .expect(
+                                                        "Error opening the Template file path you specified\n",
+                                                    );
+                                            let mut template_data = String::new();
+                                            reading_template_data
+                                                .read_to_string(&mut template_data)
+                                                .expect("Error while reading template data\n");
+                                            let mut reading_subject_data = OpenOptions::new()
+                                                    .read(true)
+                                                    .write(true)
+                                                    .open(&subject_path)
+                                                    .expect(
+                                                        "Error opening the Subject file path you specified",
+                                                    );
+                                            let mut subject_data = String::new();
+                                            reading_subject_data
+                                                .read_to_string(&mut subject_data)
+                                                .expect("Error while reading subject data\n");
 
-                                    match text_path.is_empty() {
-                                        false => {
-                                            let mut read_text_data = OpenOptions::new()
-                            .read(true)
-                            .write(true)
-                            .open(&text_path)
-                            .expect("Error opening the Text Body file path you specified\n");
-                                            let mut text = String::new();
-                                            read_text_data
-                                                .read_to_string(&mut text)
-                                                .expect("Error While Reading to String ");
-                                            ses_ops
-                                                .update_template(
-                                                    &template_name,
-                                                    &subject_data,
-                                                    &template_data,
-                                                    Some(text),
-                                                )
-                                                .await;
+                                            match text_path.is_empty() {
+                                                false => {
+                                                    let mut read_text_data = OpenOptions::new()
+                                        .read(true)
+                                        .write(true)
+                                        .open(&text_path)
+                                        .expect("Error opening the Text Body file path you specified\n");
+                                                    let mut text = String::new();
+                                                    read_text_data
+                                                        .read_to_string(&mut text)
+                                                        .expect("Error While Reading to String ");
+                                                    ses_ops
+                                                        .update_template(
+                                                            &template_name,
+                                                            &subject_data,
+                                                            &template_data,
+                                                            Some(text),
+                                                        )
+                                                        .await;
+                                                }
+                                                true => {
+                                                    ses_ops
+                                                        .update_template(
+                                                            &template_name,
+                                                            &subject_data,
+                                                            &template_data,
+                                                            None,
+                                                        )
+                                                        .await;
+                                                }
+                                            }
                                         }
-                                        true => {
-                                            ses_ops
-                                                .update_template(
-                                                    &template_name,
-                                                    &subject_data,
-                                                    &template_data,
-                                                    None,
-                                                )
-                                                .await;
-                                        }
+                                        None => {}
                                     }
                                 }
                                 true => {
@@ -383,30 +387,34 @@ async fn main() {
                             .unwrap();
                             match template_name.is_empty() {
                                 false => {
-                                    let (subject_data, template_data, _) = ses_ops
-                                        .get_template_subject_html_and_text(&template_name, false)
-                                        .await;
-                                    let (subject_variables, html_variables) = ses_ops
-                                        .get_template_variables_of_subject_and_html_body(
-                                            &subject_data,
-                                            &template_data,
-                                        );
-                                    println!(
-                                        "{}\n",
-                                        "Subject Template Variables if any".yellow().bold()
-                                    );
-                                    subject_variables.into_iter().for_each(|variable| {
-                                        println!("    {}", variable.green().bold());
-                                    });
-                                    println!("");
-                                    println!(
-                                        "{}\n",
-                                        "HTML Template Variables if any".yellow().bold()
-                                    );
-                                    html_variables.into_iter().for_each(|variable| {
-                                        println!("    {}", variable.green().bold());
-                                    });
-                                    println!("");
+                                    let is_template_exist = ses_ops
+                                        .get_template_subject_html_and_text(&template_name, false);
+                                    match is_template_exist.await {
+                                        Some((subject_data, template_data, _)) => {
+                                            let (subject_variables, html_variables) = ses_ops
+                                                .get_template_variables_of_subject_and_html_body(
+                                                    &subject_data,
+                                                    &template_data,
+                                                );
+                                            println!(
+                                                "{}\n",
+                                                "Subject Template Variables if any".yellow().bold()
+                                            );
+                                            subject_variables.into_iter().for_each(|variable| {
+                                                println!("    {}", variable.green().bold());
+                                            });
+                                            println!("");
+                                            println!(
+                                                "{}\n",
+                                                "HTML Template Variables if any".yellow().bold()
+                                            );
+                                            html_variables.into_iter().for_each(|variable| {
+                                                println!("    {}", variable.green().bold());
+                                            });
+                                            println!("");
+                                        }
+                                        None => {}
+                                    }
                                 }
                                 true => {
                                     println!("{}\n", "Template Name can't be empty".red().bold())
@@ -574,18 +582,20 @@ async fn main() {
                                         ses_ops.retrieve_emails_from_list_email_identities().await;
                                     if available_email_identies.contains(&email_to_verify) {
                                         match ses_ops.is_email_verfied(&email_to_verify).await {
-                                            true => {
-                                                let email_to_verify =
-                                                    email_to_verify.green().bold();
-                                                println!("The email address {email_to_verify} has been verified\n");
-                                                println!(" You can use it to receive messages or as a 'from' address\n");
+                                            Some(status) => {
+                                                if status {
+                                                    let email_to_verify =
+                                                        email_to_verify.green().bold();
+                                                    println!("The email address {email_to_verify} has been verified\n");
+                                                    println!(" You can use it to receive messages or as a 'from' address\n");
+                                                } else {
+                                                    let email_to_verify =
+                                                        email_to_verify.green().bold();
+                                                    println!("The email address {email_to_verify} is not verified\n");
+                                                    println!("Therefore, you can't use it to send emails ('from' address) or receive messages\n");
+                                                }
                                             }
-                                            false => {
-                                                let email_to_verify =
-                                                    email_to_verify.green().bold();
-                                                println!("The email address {email_to_verify} is not verified\n");
-                                                println!("Therefore, you can't use it to send emails ('from' address) or receive messages\n");
-                                            }
+                                            None => {}
                                         }
                                     } else {
                                         println!(

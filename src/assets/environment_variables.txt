@@ -6,5 +6,7 @@ If you are in Ubuntu based systems:
 
 nano ~/.bashrc
 
-export TEMPLATE_NAME=MyTemplateName
+export TEMPLATE_NAME=your_default_template_name
+export LIST_NAME=your_default_template_name
+export FROM_ADDRESS=your_default_from_address
 

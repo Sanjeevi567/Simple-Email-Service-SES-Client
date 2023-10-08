@@ -133,7 +133,7 @@ async fn main() {
                             )
                             .with_placeholder(&placeholder_info)
                             .with_formatter(&|input| {
-                                format!("Received Template Name Is: {input}\n")
+                                format!("Received Template Name: {input}\n")
                             })
                             .prompt_skippable()
                             .unwrap()
@@ -146,12 +146,12 @@ async fn main() {
                                         let subject_path =Text::new("Please provide the path to the subject data in HTML format to create Subject for Email Template\n")
                                     .with_placeholder("The subject can contain template variables to personalize the email template's subject line\nDo not use apostrophes, spaces, or commas around template variables\n")
                                     .with_help_message("An example subject template is available here https://tinyurl.com/4etkub75 ")
-                                    .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
+                                    .with_formatter(&|input| format!("Received Subject Path: {input}\n"))
                                     .prompt()
                                     .unwrap();
 
                                         let template_path = Text::new("Please provide the path for the template in HTML format to Create a HTML body for the Email Template\n")
-                                          .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
+                                          .with_formatter(&|input| format!("Received Template Path: {input}\n"))
                                           .with_placeholder("The HTML body can contain both template variables and HTML content\n")
                                           .with_help_message("Example template is available at this location: https://tinyurl.com/rmxwfc5v")
                                           .prompt()
@@ -182,7 +182,7 @@ async fn main() {
                                             .expect("Error while reading data\n");
                                         let text_path =Text::new("Please provide the path to the text body for the email template\n")
                                         .with_placeholder("This section is optional, but it's essential to include for recipients who do not support HTML\n")
-                                        .with_formatter(&|input| format!("Received Text Body Is: {input}\n"))
+                                        .with_formatter(&|input| format!("Received Text Body Path: {input}\n"))
                                         .with_help_message("Example text body data is available here https://tinyurl.com/ycy4sbmn")
                                         .prompt_skippable()
                                         .unwrap()
@@ -279,9 +279,9 @@ async fn main() {
                                                 "Your current email template subject is:\n {}",
                                                 current_subject
                                             );
-                                            let subject_path =Text::new("Please provide the path to the subject data in JSON format to update\n")
+                                            let subject_path =Text::new("Please provide the path to the subject data in JSON or HTML format to update\n")
                                     .with_placeholder(&current_subject)
-                                    .with_formatter(&|input| format!("Received Subject Is: {input}\n"))
+                                    .with_formatter(&|input| format!("Received Subject Path: {input}\n"))
                                     .prompt()
                                     .unwrap();
                                             let current_template_variables = ses_ops
@@ -290,16 +290,21 @@ async fn main() {
                                                     &current_template_html,
                                                 );
                                             let current_template_variables = format!("These are the current template variables in the template named '{}'\n{}",template_name,current_template_variables.1.join("\n"));
-                                            let template_path = Text::new("Please provide the path for the template in JSON format to update it with the old one\n")
+                                            let template_path = Text::new("Please provide the path for the template in JSON or HTML format to update it with the old one\n")
                                           .with_formatter(&|input| format!("Received Template Path Is: {input}\n"))
                                           .with_placeholder(&current_template_variables)
                                           .with_help_message("Example template is available at this location: https://tinyurl.com/4na92rph")
                                           .prompt()
                                           .unwrap();
-                                            let current_text = format!(
-                                                "Your current email template text is:\n{}\n",
-                                                current_text
-                                            );
+                                            let current_text = if current_text.len() > 50{
+                                                let format_text = current_text.lines().take(10).collect::<String>();
+                                                format!(
+                                                    "Your current email template text is:\n{}\n",
+                                                    format_text
+                                                )
+                                            }else{
+                                                format!("Your current email template text is:\n{}\n",current_text)
+                                            };
                                             let text_path =Text::new("Please provide the path to the text body for the email template\n")
                                     .with_placeholder(&current_text)
                                     .with_help_message("This section is optional, but it's essential to include for recipients who do not support HTML")
@@ -395,10 +400,10 @@ async fn main() {
                                 "Available Template Names in Your Credentials\n{:#?}",
                                 get_available_template_names
                             );
-                            let template_name = Text::new("Please provide the template name\n")
+                            let template_name = Text::new("Please provide the template name for which you want to download the HTML, subject, and text parts\n")
                                 .with_placeholder(&placeholder_info)
                                 .with_formatter(&|input| {
-                                    format!("Received Template Name Is: {input}\n")
+                                    format!("Received Template Name: {input}\n")
                                 })
                                 .prompt()
                                 .unwrap();
@@ -420,9 +425,10 @@ async fn main() {
                                 get_available_template_names
                             );
                             let template_name = Text::new(
-                                "Please provide the new template name for this template\n",
+                                "Please provide the template name for which you want to retrieve template variables\n",
                             )
                             .with_placeholder(&placeholder_info)
+                            .with_help_message("Look for the placeholder to identify the available template names in your credentials")
                             .with_formatter(&|input| {
                                 format!("Received Template Name Is: {input}\n")
                             })
@@ -476,12 +482,36 @@ async fn main() {
                                 Text::new("Please provide the template name for deletion\n")
                                     .with_placeholder(&placeholder_info)
                                     .with_formatter(&|str| format!(".....{str}.....\n"))
-                                    .prompt_skippable()
-                                    .unwrap()
+                                    .prompt()
                                     .unwrap();
                             match template_name.is_empty() {
                                 false => {
-                                    ses_ops.delete_template(&template_name).await;
+                                    let is_template_name_exist = ses_ops.is_email_template_exist(&template_name).await;
+                                    match is_template_name_exist{
+                                        true => {
+                                            ses_ops.get_template_subject_html_and_text(&template_name, true).await;
+                                            ses_ops.delete_template(&template_name).await;
+                                            println!("{}\n","The template has been downloaded to your current directory in case you need it".yellow().bold());
+                                        }
+                                        false => {
+                                            println!(
+                                                "The template named '{}' doesn't exist",
+                                                template_name.red().bold()
+                                            );
+                                            println!(
+                                                "{}\n",
+                                                "Here are the available template names in your credentials or region"
+                                                    .yellow()
+                                                    .bold()
+                                            );
+                                            let templates = ses_ops.list_email_templates().await;
+                                            for template_name in templates {
+                                                println!("    {}", template_name.green().bold());
+                                            }
+                                            println!("");
+                                        }
+                                    }
+                                    
                                 }
                                 true => {
                                     println!("{}\n", "Template Name can't be empty".red().bold())

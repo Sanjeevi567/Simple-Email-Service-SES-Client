@@ -1,0 +1,15 @@
+These are the possible ways to debug common errors in SES (Simple Email Service) services:
+Verify that your credentials are correct
+Ensure that names are unique, such as list names and template names
+It's possible that the credentials do not have access to this particular service. Please contact the root user for more information to understand the capabilities of your credentials.
+Some operations, like creating a template or a contact list, may fail if called a second time.
+If the email is not verified, attempting to send emails will result in a panic.Therefore, make sure to check the verification status before sending emails.
+Since names and data are represented as strings, we must be careful about the data being sent. For example, passing an empty or random string is possible but will eventually be invalidated at the server.
+Templated data should be formatted according to the template email. For example, here https://tinyurl.com/rmxwfc5v.
+Template data can have default values, allowing us to skip the variable name when sending templated emails.
+Most operations call 'expect' to provide a reason in the panic message, which helps in understanding what needs to be corrected.
+Demonstrations may not always be successful because I encountered many errors before this. Panicking actually provides some context about what it would take to correct them.
+Verify the template variables carefully using the 'Get Template Variables' option before sending templated mail
+When downloading content from the internet, make sure to remove Ctrl, Esc, newline, and carriage return characters to parse it correctly. E.g, https://tinyurl.com/38sf5t32
+Some messages are in spam folder.
+Make sure you have an active internet connection

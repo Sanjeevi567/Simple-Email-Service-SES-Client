@@ -479,7 +479,9 @@ async fn main() {
             .prompt()
             .unwrap();
                             match lst_name.is_empty() {
-                                false => {}
+                                false => {
+                                    ses_ops.delete_contact_list_name(&contact_list_name).await;
+                                }
                                 true => println!(
                                     "{}\n",
                                     "Contact List Name can't be empty".red().bold()

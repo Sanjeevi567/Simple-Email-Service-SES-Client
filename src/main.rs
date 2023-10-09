@@ -109,6 +109,8 @@ async fn main() {
                     "Get Email Identities\n",
                     "Update Email Template\n",
                     "Delete Template\n",
+                    "Delete Contact\n",
+                    "Delete Contacts\n",
                     "Delete Contact List Name\n",
                     "Common Errors\n",
                     "Return to the Main Menu\n",
@@ -251,6 +253,134 @@ async fn main() {
                                 }
                                 _ => {
                                     println!("{}\n", "Fields should not be left empty".red().bold())
+                                }
+                            }
+                        }
+                        "Delete Contact\n" => {
+                            let get_available_contact_lists = ses_ops.list_contact_lists().await;
+                            let format_it = format!(
+                                "The contact list name below is available in your credentials or region if any:\n    {}\n",
+                                get_available_contact_lists.join("")
+                            );
+                            let placeholder = format!(
+                                "Default Contact List Name Is: {}",
+                                ses_ops.get_list_name()
+                            );
+                            let contact_list = Text::new("Please enter the name of the contact list from which you want to delete the contact or email\n")
+                                .with_placeholder(&format_it)
+                                .with_formatter(&|input| format!("Received Contact List Name: {input}\n"))
+                                .with_help_message(&placeholder)
+                                .prompt_skippable()
+                                .unwrap()
+                                .unwrap();
+                            match contact_list.is_empty() {
+                                false => {
+                                    if ses_ops.is_contact_list_name_exist(&contact_list).await {
+                                        let contact = Text::new(
+                                            "Please enter the contact you wish to delete from the provided contact list\n",
+                                        )
+                                        .with_placeholder(
+                                            "The contact is an email address stored in the specified contact list\n",
+                                        )
+                                        .with_formatter(&|input| format!("Received Contact or Email: {input}\n"))
+                                        .prompt()
+                                        .unwrap();
+                                        match contact.is_empty() {
+                                            false => {
+                                                ses_ops
+                                                    .delete_contact(
+                                                        &contact,
+                                                        Some(&contact_list),
+                                                        true,
+                                                    )
+                                                    .await;
+                                            }
+                                            true => println!(
+                                                "{}\n",
+                                                "Email/Contact can't be empty".red().bold()
+                                            ),
+                                        }
+                                    } else {
+                                        println!(
+                                            "The provided Contact List Name '{}' doesn't exist",
+                                            contact_list.red().bold()
+                                        );
+                                        println!(
+                                            "{}\n",
+                                            "The contact list name below is available in your credentials or region if any"
+                                                .yellow()
+                                                .bold()
+                                        );
+                                        let contact_lists = ses_ops.list_contact_lists().await;
+                                        for contact_list in contact_lists {
+                                            println!("    {}", contact_list.green().bold());
+                                        }
+                                        println!("");
+                                    }
+                                }
+                                true => {
+                                    if ses_ops.is_contact_list_name_exist(&contact_list).await {
+                                        let contact = Text::new(
+                                            "Please enter the contact you wish to delete from the provided contact list\n",
+                                        )
+                                        .with_placeholder(
+                                            "The contact is an email address stored in the specified contact list\n",
+                                        )
+                                        .with_formatter(&|input| format!("Received Contact or Email: {input}\n"))
+                                        .prompt()
+                                        .unwrap();
+                                        match contact.is_empty() {
+                                            false => {
+                                                ses_ops.delete_contact(&contact, None, true).await;
+                                            }
+                                            true => println!(
+                                                "{}\n",
+                                                "Email/Contact can't be empty".red().bold()
+                                            ),
+                                        }
+                                    } else {
+                                        println!(
+                                            "The provided Contact List Name '{}' doesn't exist",
+                                            contact_list.red().bold()
+                                        );
+                                        println!(
+                                            "{}\n",
+                                            "The contact list name below is available in your credentials or region if any"
+                                                .yellow()
+                                                .bold()
+                                        );
+                                        let contact_lists = ses_ops.list_contact_lists().await;
+                                        for contact_list in contact_lists {
+                                            println!("    {}", contact_list.green().bold());
+                                        }
+                                        println!("");
+                                    }
+                                }
+                            }
+                        }
+                        "Delete Contacts\n" => {
+                            let get_available_contact_lists = ses_ops.list_contact_lists().await;
+                            let format_it = format!(
+        "The contact list name below is available in your credentials or region if any:\n    {}\n",
+        get_available_contact_lists.join("")
+    );
+                            let placeholder = format!(
+                                "Default Contact List Name Is: {}",
+                                ses_ops.get_list_name()
+                            );
+                            let contact_list = Text::new("Please enter the name of the contact list from which you want to delete all the contacts or emails within it\n")
+        .with_placeholder(&format_it)
+        .with_formatter(&|input| format!("Received Contact List Name: {input}\n"))
+        .with_help_message(&placeholder)
+        .prompt_skippable()
+        .unwrap()
+        .unwrap();
+                            match contact_list.is_empty() {
+                                false => {
+                                    ses_ops.delete_contacts(Some(&contact_list)).await;
+                                }
+                                true => {
+                                    ses_ops.delete_contacts(None).await;
                                 }
                             }
                         }
@@ -618,7 +748,6 @@ async fn main() {
                                             Some(&list_name),
                                         )
                                         .await;
-                                    println!("You must pass the email '{}' to the 'Create Email Identity' option before sending an email to this address\n",email.yellow().bold());
                                 }
                                 (false, false, true) => {
                                     ses_ops
@@ -632,7 +761,6 @@ async fn main() {
                                     ses_ops
                                         .create_email_contact_without_verification(&email, None)
                                         .await;
-                                    println!("You must pass the email '{}' to the 'Create Email Identity' option before sending an email to this address\n",email.yellow().bold());
                                 }
                                 (true, false, true) => {
                                     ses_ops
@@ -972,33 +1100,32 @@ async fn main() {
                                                 }
                                             }
                                             (false, true, false) => {
-                                                
-                                                    let mut reading_template_data = OpenOptions::new()
+                                                let mut reading_template_data = OpenOptions::new()
                             .read(true)
                             .write(true)
                             .open(&template_path)
                             .expect(
                                 "Error opening the Template file path you specified",
                             );
-                                                    let mut template_data = String::new();
-                                                    reading_template_data
-                                                        .read_to_string(&mut template_data)
-                                                        .expect("Error while reading data\n");
-                                                    let email_content = TemplateMail::builder(
-                                                        &template_name,
-                                                        &template_data,
+                                                let mut template_data = String::new();
+                                                reading_template_data
+                                                    .read_to_string(&mut template_data)
+                                                    .expect("Error while reading data\n");
+                                                let email_content = TemplateMail::builder(
+                                                    &template_name,
+                                                    &template_data,
+                                                )
+                                                .build();
+                                                match ses_ops
+                                                    .send_mono_email(
+                                                        &email,
+                                                        Template_(email_content),
+                                                        None,
                                                     )
-                                                    .build();
-                                                    match ses_ops
-                                                        .send_mono_email(
-                                                            &email,
-                                                            Template_(email_content),
-                                                            None,
-                                                        )
-                                                        .await
-                                                    {
-                                                        Ok(email_builder) => {
-                                                            email_builder
+                                                    .await
+                                                {
+                                                    Ok(email_builder) => {
+                                                        email_builder
                                                             .send()
                                                         .await
                                                         .map(|_| {
@@ -1012,16 +1139,14 @@ async fn main() {
                                                         .expect(
                                                             "Error while sending template mail\n",
                                                         );
-                                                        }
-                                                        Err(msg) =>{
-                                                            println!("{}", msg);
-                                                            println!("The verification email has been sent to: {}\n",email.green().bold());
-                                                        } 
                                                     }
-                                                
+                                                    Err(msg) => {
+                                                        println!("{}", msg);
+                                                        println!("The verification email has been sent to: {}\n",email.green().bold());
+                                                    }
+                                                }
                                             }
                                             (true, true, false) => {
-                                                
                                                 let mut reading_template_data = OpenOptions::new()
                                                     .read(true)
                                                     .write(true)
@@ -1064,10 +1189,8 @@ async fn main() {
                                                         println!("The verification email has been sent to: {}\n",email.green().bold());
                                                     }
                                                 }
-                                            
-                                        }
+                                            }
                                             (true, false, false) => {
-                                                
                                                 let mut reading_template_data = OpenOptions::new()
                                                     .read(true)
                                                     .write(true)
@@ -1110,8 +1233,7 @@ async fn main() {
                                                         println!("The verification email has been sent to: {}\n",email.green().bold());
                                                     }
                                                 }
-                                            
-                                        }
+                                            }
                                             _ => {
                                                 println!("{}\n","Please ensure that the fields are not empty, and then try again.".red().bold());
                                             }

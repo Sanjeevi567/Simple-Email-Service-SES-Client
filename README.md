@@ -1,23 +1,43 @@
 ### Simple Email Service<a name="ses"></a>
 
-Supported Operations in [SESV2](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_Operations.html) APIS,
+Here is the corrected text with suggestions for improvement:
 
-- [CreateContact](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateContact.html) - To create a new email contact which only add the contact to the contact list you have.
-- [CreateContactList](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateContactList.html) -To create new contact list name to store all our emails to latter to send emails to them. Only one contact list per region is allowed to have.
-- [CreateEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateEmailIdentity.html) -To send a verification email to given email. This API only send a verification email since only verified email can receive the email then you add that email to the list. There is two option available in `Add an email to the list` you first add the email to the list then it will ask whether you want to send verification email while after added to the list or Just want to add email to the list .If you choose latter option you have to execute `Create Email Identity` option to send a verification email. Each option includes a help message at the end to help you along the way even if you don't read this blog post.
-- [CreateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateEmailTemplate.html) - This will create a html and subject template with optionaly allow to set the text only body if the receipient doesn't support **html** part. Both ***Html Part*** and ***subject part*** can contain template variables to personalize email but don't use html like format in subject part. An example html and subject body is available [here](https://github.com/Sanjuvi/Simple-Email-Service-SES-Client/blob/main/src/assets/template.html) and [here](https://github.com/Sanjuvi/Simple-Email-Service-SES-Client/blob/main/src/assets/subject.html) respectively to know how to create your own.  You can have multiple email templates in the same credentials.
-- [DeleteContact](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteContact.html) - Delete the email contact from the list but from verified identity which should delete through using `DeleteEmailIdentity` which you can't use right now directly.
-- [DeleteContactList](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteContactList.html) -Delete the Contact list if one available which also deletes the emails in that list.
-- [DeleteEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteEmailIdentity.html) - Delete a email identity whihc is created using `Delete Email Identity` option.Not directly consumed
-- [DeleteEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteEmailTemplate.html) -Delete the template associated with the given template name. The option in cli will download the Email Template to your local computer before deleting.
-- [GetEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_GetEmailIdentity.html) - Not directly consumed. But used to generate the all the email identies both in text and PDF format in the `Get Email Identities` option.
-- [GetEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_GetEmailTemplate.html) -Downloading the email template associated with given template name. The placeholder will show you all available template names in your credentials.
-- [ListContactLists](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListContactLists.html) - This api used as placholder information and also inside other options to avoid the error if you give the non existent conatct list name without executing operation.
-- [ListContacts](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListContacts.html) -This api used inside different option to show you nice error message. You can download all the emails in the given contact list name by executing `Retrieve emails from the provided list` option which generate a text and PDF file with email.
-- [ListEmailIdenties](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListEmailIdentities.html) - Not directly consumed. Used to avoid the errors in other options. For example, used to avoid creating email identity again for the same email since using same email will results in error but avoided before pass into `Create Email Identity` or `Get Email Identity`using this one.
-- [ListEmailTemplates](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListEmailTemplates.html) - Not directly consumed. Options start with `List*` will used avoid the errors in the API calls. This API response used when you provide non existent template name without executing a operation so that you can continue with the application without crashing. 
-- [SendEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html). You can send simple email without creating a email template but the email shoud be verified. There is no need to use [SendBulkEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendBulkEmail.html) Api to send mulitple emails.
-- [SendCustomVerificationEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendCustomVerificationEmail.html) - Exist but not used. This will send a custom verification email because of free trail version i can't use and test both [CreateCustomVerificationEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateCustomVerificationEmailTemplate.html) and [SendCustomVerificationEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendCustomVerificationEmail.html) to demonstrate anything other than mentioning it.
-- [UpdateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_UpdateEmailTemplate.html) -Updates the existing email template.
+**Supported Operations in [SESV2](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_Operations.html) APIs:**
+
+- [CreateContact](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateContact.html) - This operation allows you to create a new email contact and add the contact to your contact list.
+
+- [CreateContactList](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateContactList.html) - This operation enables you to create a new contact list name to store all your emails for future email campaigns. Note that only one contact list per region is allowed.
+
+- [CreateEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateEmailIdentity.html) - Use this operation to send a verification email to a given email address. This API sends a verification email since only verified emails can receive emails and be added to the contact list. You have two options when adding an email to the list: you can either add the email to the list and then send a verification email, or you can simply add the email to the list. If you choose the latter option, you must execute the "Create Email Identity" operation separately to send a verification email. Each option includes a help message at the end to guide you through the process, even if you haven't read the documentation.
+
+- [CreateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateEmailTemplate.html) - This operation creates an HTML and subject template, optionally allowing you to set a text-only body for recipients who don't support HTML. Both the HTML and subject parts can contain template variables to personalize the email. However, do not use HTML-like formatting in the subject part. You can find example HTML and subject body templates [here](https://github.com/Sanjuvi/Simple-Email-Service-SES-Client/blob/main/src/assets/template.html) and [here](https://github.com/Sanjuvi/Simple-Email-Service-SES-Client/blob/main/src/assets/subject.html) respectively, to help you create your own templates. You can have multiple email templates under the same credentials.
+
+- [DeleteContact](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteContact.html) - Use this operation to delete an email contact from the list. For deleting a verified identity, you should use the "Delete Email Identity" operation, which cannot be used directly at this time.
+
+- [DeleteContactList](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteContactList.html) - This operation deletes a contact list, including all the emails in that list if one is available.
+
+- [DeleteEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteEmailIdentity.html) - Delete an email identity created using the "Delete Email Identity" option. This operation cannot be used directly.
+
+- [DeleteEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_DeleteEmailTemplate.html) - Delete the template associated with the given template name. The CLI option will download the email template to your local computer before deleting it.
+
+- [GetEmailIdentity](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_GetEmailIdentity.html) - This operation is not consumed directly but is used to generate all email identities, both in text and PDF formats, in the "Get Email Identities" option.
+
+- [GetEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_GetEmailTemplate.html) - Download the email template associated with a given template name. The placeholder will show you all available template names in your credentials.
+
+- [ListContactLists](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListContactLists.html) - This API is used for placeholder information and also within other options to prevent errors when providing a nonexistent contact list name without executing an operation.
+
+- [ListContacts](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListContacts.html) - This API is used within different options to provide informative error messages. You can download all the emails in the given contact list by executing the "Retrieve Emails from the Provided List" option, which generates both a text and PDF file with the emails.
+
+- [ListEmailIdentities](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListEmailIdentities.html) - This operation is not consumed directly but is used to prevent errors in other options. For example, it helps prevent the creation of email identities for the same email address, which would result in an error. This is checked before passing the email into the "Create Email Identity" or "Get Email Identity" operations.
+
+- [ListEmailTemplates](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_ListEmailTemplates.html) - This operation is not consumed directly. Options starting with "List*" are used to avoid errors in API calls. The API response is used when providing a nonexistent template name without executing an operation, allowing you to continue using the application without crashing.
+
+- [SendEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html) - You can use this operation to send a simple email without creating an email template, but the email must be verified. There is no need to use the [SendBulkEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendBulkEmail.html) API to send multiple emails.
+
+- [SendCustomVerificationEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendCustomVerificationEmail.html) - This operation exists but is not used. It allows you to send a custom verification email. Due to the free trial version limitations, I cannot use and test both [CreateCustomVerificationEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateCustomVerificationEmailTemplate.html) and [SendCustomVerificationEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendCustomVerificationEmail.html) to demonstrate their functionality.
+
+- [UpdateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_UpdateEmailTemplate.html) - This operation updates an existing email template.
+
+Please review and make any necessary adjustments to ensure clarity and correctness in your documentation.
 
 ### Documentation:

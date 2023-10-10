@@ -35,3 +35,5 @@
 
 - [UpdateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_UpdateEmailTemplate.html) - This operation updates an existing email template.
 ### Documentation:
+
+[Blog Post Link](https://sanjuvi.github.io/Blog/posts/Simple-Email-Service/)

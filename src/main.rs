@@ -101,6 +101,7 @@ async fn main() {
                     "Create Email Template\n",
                     "Get Email Template\n",
                     "Get Email Template Variables\n",
+                    "Match Template Variables\n",
                     "Send a Single Templated Email\n",
                     "Send a Bulk of Templated Emails\n",
                     "Retrieve emails from the provided list\n",
@@ -125,8 +126,110 @@ async fn main() {
                     .with_page_size(13)
                     .prompt()
                     .unwrap();
-
                     match email_choice {
+                        "Match Template Variables\n" => {
+                            let available_template_names = ses_ops.list_email_templates().await;
+                            let placeholder = format!(
+                                "Below are the template names available in your account:\n{}\n",
+                                available_template_names.join("\n")
+                            );
+                            let help_placeholder = format!(
+                                "The default template name is '{}'",
+                                ses_ops.get_template_name()
+                            );
+                            let template_name = Text::new("Please provide the template name with which you want to compare the template data you have\n")
+        .with_placeholder(&placeholder)
+        .with_formatter(&|input| format!("Received Template Name: {input}\n"))
+        .with_help_message(&help_placeholder)
+        .prompt_skippable()
+        .unwrap()
+        .unwrap();
+                            match template_name.is_empty() {
+                                false => {
+                                    if ses_ops.is_email_template_exist(&template_name).await {
+                                        let template_data_path = Text::new("Please specify the JSON template data path\n")
+                .with_formatter(&|input| format!("Received Template Json Data Path: {input}\n"))
+                .with_placeholder(
+                    "Ensure that the JSON template data matches the template you selected above\n",
+                )
+                .with_help_message("Do not include spaces, commas, or apostrophes around keys")
+                .prompt()
+                .unwrap();
+                                        match template_data_path.is_empty() {
+                                            false => {
+                                                ses_ops
+                                                    .match_template_data_with_template(
+                                                        Some(&template_name),
+                                                        &template_data_path,
+                                                    )
+                                                    .await;
+                                            }
+                                            true => println!(
+                                                "{}\n",
+                                                "The Template Json Data Path can't be empty"
+                                                    .red()
+                                                    .bold()
+                                            ),
+                                        }
+                                    } else {
+                                        println!(
+                                            "The specified template name '{}' does not exist",
+                                            template_name.red().bold()
+                                        );
+                                        println!(
+                    "{}\n",
+                    "Here is a list of template names in your credentials if any"
+                        .yellow()
+                        .bold()
+                );
+                                        for template_name in available_template_names {
+                                            println!("    {}", template_name.green().bold());
+                                        }
+                                        println!("");
+                                    }
+                                }
+                                true => {
+                                    if ses_ops.is_email_template_exist(&template_name).await {
+                                        let template_data_path = Text::new("Please specify the JSON template data path\n")
+                .with_formatter(&|input| format!("Received Template Json Data Path: {input}\n"))
+                .with_placeholder(
+                    "Ensure that the JSON template data matches the template you selected above\n",
+                )
+                .with_help_message("Do not include spaces, commas, or apostrophes around keys")
+                .prompt()
+                .unwrap();
+                                        match template_data_path.is_empty() {
+                                            false => {
+                                                ses_ops
+                                                    .match_template_data_with_template(
+                                                        None,
+                                                        &template_data_path,
+                                                    )
+                                                    .await;
+                                            }
+                                            true => println!(
+                                                "{}\n",
+                                                "The Template Json Data Path can't be empty"
+                                                    .red()
+                                                    .bold()
+                                            ),
+                                        }
+                                    } else {
+                                        println!("{}","Make sure you have set the 'TEMPLATE_NAME' environment variable, and the value it holds should exist in your credentials".red().bold());
+                                        println!(
+                    "{}\n",
+                    "Here is a list of template names in your credentials if any"
+                        .yellow()
+                        .bold()
+                );
+                                        for template_name in available_template_names {
+                                            println!("    {}", template_name.green().bold());
+                                        }
+                                        println!("");
+                                    }
+                                }
+                            }
+                        }
                         "Create Email Template\n" => {
                             let get_available_template_names = ses_ops.list_email_templates().await;
                             let placeholder_info = format!("Please note that these template names are already available for your use:\n{:#?}",get_available_template_names);

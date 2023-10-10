@@ -1,10 +1,10 @@
 {
-    "Name" : "sanjuvi",
-    "Email" : "sanjeevimani567@gmail.com",
-    "Blog": "https://sanjuvi.github.io/Blog/",
+    "Name"  : "sanjuvi",
+    "Email"  : "sanjeevimani567@gmail.com",
+    "Blog":  "https://sanjuvi.github.io/Blog/",
     
   
-    "Lang" : "Rust",
+    "Lang"   : "Rust",
     "Author_Name" : "Sanjeevi",
-    "Api": "AWS Simple Email Service(SES)"
+    "Api"      : "AWS Simple Email Service(SES)"
 }

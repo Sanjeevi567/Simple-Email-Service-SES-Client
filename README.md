@@ -1,7 +1,5 @@
 ### Simple Email Service<a name="ses"></a>
 
-Here is the corrected text with suggestions for improvement:
-
 **Supported Operations in [SESV2](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_Operations.html) APIs:**
 
 - [CreateContact](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateContact.html) - This operation allows you to create a new email contact and add the contact to your contact list.
@@ -38,6 +36,5 @@ Here is the corrected text with suggestions for improvement:
 
 - [UpdateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_UpdateEmailTemplate.html) - This operation updates an existing email template.
 
-Please review and make any necessary adjustments to ensure clarity and correctness in your documentation.
 
 ### Documentation:

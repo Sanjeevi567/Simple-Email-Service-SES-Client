@@ -20,7 +20,8 @@ async fn main() {
         "Quit the application\n",
     ];
     let mut credential = CredentInitialize::default();
-    let mut ses_ops: SesOps = SesOps::build(credential.build());
+    let mut sdk_config = credential.build();
+    let mut ses_ops: SesOps = SesOps::build(&sdk_config);
     'main: loop {
         let choice = Select::new(
             "Select the option to execute the operation\n",
@@ -49,8 +50,8 @@ async fn main() {
                             credentials.secret_access_key(),
                             region.as_deref(),
                         );
-                        let config = credential.build();
-                        ses_ops = SesOps::build(config.clone());
+                        sdk_config = credential.build();
+                        ses_ops = SesOps::build(&sdk_config);
                         println!("{}\n","Please verify the credentials by printing the credential information before proceeding with any operations".blue().bold());
                     }
                     false => {
@@ -62,8 +63,8 @@ async fn main() {
                         let region = var("AWS_DEFAULT_REGION")
                         .expect("Ensure that the 'AWS_DEFAULT_REGION' environment variable is set, and its value is provided by AWS\n");
                         credential.update(&access_key, &secret_key, Some(&region));
-                        let config = credential.build();
-                        ses_ops = SesOps::build(config.clone());
+                        sdk_config = credential.build();
+                        ses_ops = SesOps::build(&sdk_config);
                         println!("{}\n","Please verify the credentials by printing the credential information before proceeding with any operations".red().bold());
                     }
                 }

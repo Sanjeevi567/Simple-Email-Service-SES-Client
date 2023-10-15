@@ -84,8 +84,8 @@ async fn main() {
 
                 match confirm {
                     true => {
-                        println!("Here is your credential informations");
-                        println!("{:#?}\n", credential.get_credentials());
+                        println!("{}\n","Here is your credential informations".yellow().bold());
+                        credential.print_credentials();
                     }
                     false => {
                         println!("{}\n", "Sure...".green().bold())

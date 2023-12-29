@@ -36,4 +36,4 @@
 - [UpdateEmailTemplate](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_UpdateEmailTemplate.html) - This operation updates an existing email template.
 ### Documentation:
 
-[Blog Post Link](https://sanjuvi.github.io/Blog/posts/Simple-Email-Service/)
+[Blog Post Link](https://sanjeevi.hashnode.dev/unlocking-the-mystery-why-your-templated-emails-arent-reaching-recipients-despite-successful-sends)
